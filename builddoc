@@ -1,0 +1,28 @@
+#! /bin/bash
+# -*- mode:sh -*-
+
+url_last1=https://en.geneanet.org/genealogy/1/Surname.php
+url_last2=https://en.geneanet.org/genealogy/2/Surname.php
+url_last3=https://en.geneanet.org/genealogy/3/Surname.php
+url_first=http://www.avss.ucsb.edu/NameGB.HTM
+
+first_target=temp_names.xml
+final_target=pop_names.xml
+
+echo "<?xml version=\"1.0\" ?>" > ${first_target}
+echo "<lists>" >> ${first_target}
+
+echo "scraping several last names lists"
+./getpage ${url_last1} | ./scrape ss_geneanet.xsl - >> ${first_target}
+./getpage ${url_last2} | ./scrape ss_geneanet.xsl - >> ${first_target}
+./getpage ${url_last3} | ./scrape ss_geneanet.xsl - >> ${first_target}
+echo "scraping ${url_first}"
+./getpage ${url_first} | ./scrape ss_avss.xsl - >> ${first_target}
+
+echo "</lists>" >> ${first_target}
+
+xsltproc ss_make_pop_names.xsl ${first_target} > ${final_target}
+
+rm ${first_target}
+
+

@@ -1,0 +1,126 @@
+#!/usr/bin/env python2
+# -*- mode:python -*-
+
+import sys
+import libxml2
+import libxslt
+import random
+import tempfile
+
+g_xmldoc = None
+
+g_pop_lnames = 0
+g_pop_gnames = 0
+g_pop_bnames = 0
+
+def read_limit(name):
+    global g_xmldoc
+    limit = 0
+    nl = g_xmldoc.xpathEval("/names/" + name);
+    if nl and len(nl)>0:
+        limit = nl[0].prop("instances")
+
+    return limit
+
+def get_limits():
+    global g_pop_lnames, g_pop_gnames, g_pop_bnames
+    g_pop_lnames = int(read_limit("lnames"))
+    g_pop_gnames = int(read_limit("girls"))
+    g_pop_bnames = int(read_limit("boys"))
+
+def print_limits():
+    global g_pop_lnames, g_pop_gnames, g_pop_bnames
+    print "g_pop_lnames=%d g_pop_gnames=%d g_pop_bnames=%d" % (
+        g_pop_lnames,
+        g_pop_gnames,
+        g_pop_bnames)
+
+def open_xml():
+    global g_xmldoc
+    fname = "pop_names.xml"
+    try:
+        g_xmldoc = libxml2.readFile(fname,None,0)
+        get_limits()
+    except libxml2.parserError as e:
+        print "Failed to open \"%s\" (%s)." % (fname, e)
+
+def get_girl_num():
+    global g_pop_gnames
+    return random.randint(0,g_pop_gnames)
+
+def get_boy_num():
+    global g_pop_bnames
+    return random.randint(0,g_pop_bnames)
+
+def get_surname():
+    global g_pop_lnames
+    return random.randint(0,g_pop_lnames)
+
+def make_person():
+    if random.randint(0,1)==1:
+        gender = "f"
+        nameno = get_girl_num()
+    else:
+        gender = "m"
+        nameno = get_boy_num()
+
+    return {"gender" : gender,
+            "nameno" : nameno,
+            "lnameno": get_surname()}
+
+def make_el(dictperson, openfile):
+    openfile.write("<person")
+    for  k, v in dictperson.items():
+        openfile.write(" %s=\"%s\"" % (k,v))
+    openfile.write(" />\n")
+
+def report_usage():
+    print "Enter the number of people to generate."
+    print "Example, to print a list of 20 people:"
+    print "./namegen 20"
+
+def transform_with_popfile(xslproc, name_popfile):
+    print "Do nothing!"
+
+def get_xslproc(name_xslfile, name_popfile,  f_use_ss):
+    xsldoc = libxml2.readFile(name_xslfile, None, 0)
+    if xsldoc:
+        style = libxslt.parseStylsheet(xsldoc)
+        if style:
+            f_use_ss(style, mame_popfile)
+            style.freeStylesheet()
+
+def reconcile_name_indexes(name_indexes_file):
+    get_xslproc("ss_recon_indexes.xsl", name_indexes_file, transform_with_popfile)
+    
+def generate_name_indexes(stop, f_use_name_indexes):
+    nfilename = "name_indexes.xml"
+    nfile = open(nfilename,"wr")
+
+    # nfile = tempfile.mkstemp(suffix="xml",text=True)
+    # nfilename = nfile[1]
+
+    if nfile:
+        nfile.write("<?xml version=\"1.0\" ?>\n")
+        nfile.write("<plist>\n")
+        for x in range(0,stop):
+            make_el(make_person(), nfile)
+        nfile.write("</plist>\n")
+
+        # f_use_name_indexes(nfilename)
+
+        nfile.close()
+
+def main():
+    if len(sys.argv) < 2:
+        report_usage()
+    else:
+        stop = int(sys.argv[1])
+        if stop==0:
+            report_usage()
+        else:
+            open_xml()
+            generate_name_indexes(stop, reconcile_name_indexes)
+
+if __name__ == "__main__":
+    main()

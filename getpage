@@ -1,0 +1,63 @@
+#!/usr/bin/env python2
+# -*- mode:python -*-
+
+import sys     # for handling arguments (argv)
+import libxml2
+import urllib2
+
+
+def namespaceDefs(node):
+    n = node.nsDefs()
+    while n:
+        yield n
+        n = n.next
+
+def checkNamespaceDefs(node, count):
+    nsList = list(namespaceDefs(node))
+    #print nsList
+    if len(nsList) != count :
+        raise Exception("Error: saw %d namespace declarations.  Expected %d" % (len(nsList), count))
+
+def printNamespaceDefs(node):
+    nsList = list(namespaceDefs(node))
+    print nsList
+    
+
+def read_url(f_use):
+    if len(sys.argv) > 1:
+        xmlpath = sys.argv[1]
+        try:
+            response = urllib2.urlopen(xmlpath)
+            f_use(response)
+        except urllib2.URLError as e:
+            sys.stderr.write("Failed to open URL \"%s\"\n\"%s\"\n"
+                             % (xmlpath, e.reason))
+
+def write_xmldoc(rfile):
+    readopts = (libxml2.HTML_PARSE_RECOVER |
+                libxml2.HTML_PARSE_NODEFDTD |
+                libxml2.HTML_PARSE_NOERROR |
+                libxml2.HTML_PARSE_NOWARNING |
+                libxml2.HTML_PARSE_NONET)
+
+    xmldoc = libxml2.htmlReadDoc(rfile.read(),None,None,readopts)
+    if xmldoc:
+        dumpopts = (libxml2.XML_SAVE_FORMAT   +
+                    libxml2.XML_SAVE_NO_DECL  +
+                    libxml2.XML_SAVE_XHTML    +
+                    libxml2.XML_SAVE_AS_XML
+)
+
+        root = xmldoc.getRootElement()
+        root.saveTo(sys.stdout, None, dumpopts)
+        # xmldoc.formatDump(sys.stdout,dumpopts)
+        xmldoc.freeDoc()
+    else:
+        sys.stderr.write("failed to parse html document")
+
+def main():
+    read_url(write_xmldoc)
+
+
+if __name__ == "__main__":
+   main()
