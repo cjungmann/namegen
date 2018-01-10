@@ -16,6 +16,11 @@
 
   <xsl:template match="/">
     <people>
+      <schema>
+        <field name="gender" />
+        <field name="fname" />
+        <field name="lname" />
+      </schema>
       <xsl:apply-templates select="$popdoc/names" mode="show_limits" />
       <xsl:apply-templates select="*" />
     </people>
@@ -35,6 +40,7 @@
 
   <xsl:template match="person">
     <xsl:element name="person">
+      <xsl:attribute name="gender"><xsl:value-of select="@gender" /></xsl:attribute>
       <xsl:apply-templates select="." mode="add_fname" />
       <xsl:apply-templates select="." mode="add_lname" />
     </xsl:element>
@@ -44,7 +50,6 @@
     <xsl:variable name="nameno" select="@nameno" />
     <xsl:variable name="name" select="$names_boy/name[not(@bottom &lt; $nameno)][1]" />
 
-    <xsl:attribute name="bnameno"><xsl:value-of select="$nameno" /></xsl:attribute>
     <xsl:attribute name="fname">
       <xsl:value-of select="$name" />
     </xsl:attribute>
@@ -54,7 +59,6 @@
     <xsl:variable name="nameno" select="@nameno" />
     <xsl:variable name="name" select="$names_girl/name[not(@bottom &lt; $nameno)][1]" />
 
-    <xsl:attribute name="gnameno"><xsl:value-of select="$nameno" /></xsl:attribute>
     <xsl:attribute name="fname">
       <xsl:value-of select="$name" />
     </xsl:attribute>
@@ -64,7 +68,6 @@
     <xsl:variable name="nameno" select="@lnameno" />
     <xsl:variable name="name" select="$names_last/name[not(@bottom &lt; $nameno)][1]" />
 
-    <xsl:attribute name="lnameno"><xsl:value-of select="$nameno" /></xsl:attribute>
     <xsl:attribute name="lname">
       <xsl:value-of select="$name" />
     </xsl:attribute>
