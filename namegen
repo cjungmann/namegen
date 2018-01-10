@@ -80,14 +80,23 @@ def report_usage():
     print "./namegen 20"
 
 def transform_with_popfile(xslproc, name_popfile):
-    print "Do nothing!"
+    try:
+        xmldoc = libxml2.readFile(name_popfile,None,0)
+        try:
+            result = xslproc.applyStylesheet(xmldoc,None)
+            rstring = xslproc.saveResultToString(result)
+            sys.stdout.write(rstring)
+        except Exception as e:
+            print "Exception while transforming file: \"%s\".\n" % e
+    except Exception as e:
+        print "Exception \"%s\" while opening %s.\"" % ( e, name_popfile)
 
 def get_xslproc(name_xslfile, name_popfile,  f_use_ss):
     xsldoc = libxml2.readFile(name_xslfile, None, 0)
     if xsldoc:
-        style = libxslt.parseStylsheet(xsldoc)
+        style = libxslt.parseStylesheetDoc(xsldoc)
         if style:
-            f_use_ss(style, mame_popfile)
+            f_use_ss(style, name_popfile)
             style.freeStylesheet()
 
 def reconcile_name_indexes(name_indexes_file):
@@ -106,10 +115,10 @@ def generate_name_indexes(stop, f_use_name_indexes):
         for x in range(0,stop):
             make_el(make_person(), nfile)
         nfile.write("</plist>\n")
-
-        # f_use_name_indexes(nfilename)
-
         nfile.close()
+
+        f_use_name_indexes(nfilename)
+
 
 def main():
     if len(sys.argv) < 2:
