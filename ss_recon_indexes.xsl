@@ -21,15 +21,8 @@
         <field name="fname" />
         <field name="lname" />
       </schema>
-      <xsl:apply-templates select="$popdoc/names" mode="show_limits" />
       <xsl:apply-templates select="*" />
     </people>
-  </xsl:template>
-
-  <xsl:template match="names" mode="show_limits">
-    <xsl:element name="limits">
-      <xsl:apply-templates select="*" mode="add_limit_attrib" />
-    </xsl:element>
   </xsl:template>
 
   <xsl:template match="*[@instances]" mode="add_limit_attrib">
