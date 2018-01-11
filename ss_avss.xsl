@@ -64,10 +64,13 @@
   <xsl:template match="tr">
     <xsl:param name="namecol" />
     <xsl:variable name="freqcol" select="$namecol+1" />
-    <xsl:element name="nom">
-      <xsl:attribute name="freq"><xsl:value-of select="td[position()=$freqcol]" /></xsl:attribute>
-      <xsl:value-of select="td[position()=$namecol]" />
-    </xsl:element>
+    <xsl:variable name="name" select="normalize-space(td[position()=$namecol])" />
+    <xsl:if test="not($name='-')">
+      <xsl:element name="nom">
+        <xsl:attribute name="freq"><xsl:value-of select="td[position()=$freqcol]" /></xsl:attribute>
+        <xsl:value-of select="$name" />
+      </xsl:element>
+    </xsl:if>
   </xsl:template>
 
 </xsl:stylesheet>
