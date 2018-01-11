@@ -46,15 +46,15 @@ def open_xml():
 
 def get_girl_num():
     global g_pop_gnames
-    return random.randint(0,g_pop_gnames)
+    return random.randint(1,g_pop_gnames)
 
 def get_boy_num():
     global g_pop_bnames
-    return random.randint(0,g_pop_bnames)
+    return random.randint(1,g_pop_bnames)
 
 def get_surname():
     global g_pop_lnames
-    return random.randint(0,g_pop_lnames)
+    return random.randint(1,g_pop_lnames)
 
 def make_person():
     if random.randint(0,1)==1:
@@ -66,7 +66,8 @@ def make_person():
 
     return {"gender" : gender,
             "nameno" : nameno,
-            "lnameno": get_surname()}
+            "lnameno": get_surname(),
+            "cyear"  : random.randint(2018, 2021)}
 
 def make_el(dictperson, openfile):
     openfile.write("<person")
