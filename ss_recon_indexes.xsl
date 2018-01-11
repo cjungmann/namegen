@@ -20,6 +20,7 @@
         <field name="gender" />
         <field name="fname" />
         <field name="lname" />
+        <field name="cyear" type="INT" />
       </schema>
       <xsl:apply-templates select="*" />
     </people>
@@ -31,11 +32,16 @@
     </xsl:attribute>
   </xsl:template>
 
+  <xsl:template match="@*" mode="add_attr">
+    <xsl:attribute name="{local-name()}"><xsl:value-of select="."/></xsl:attribute>
+  </xsl:template>
+
   <xsl:template match="person">
     <xsl:element name="person">
-      <xsl:attribute name="gender"><xsl:value-of select="@gender" /></xsl:attribute>
       <xsl:apply-templates select="." mode="add_fname" />
       <xsl:apply-templates select="." mode="add_lname" />
+      <xsl:apply-templates select="@gender" mode="add_attr" />
+      <xsl:apply-templates select="@cyear" mode="add_attr" />
     </xsl:element>
   </xsl:template>
 
